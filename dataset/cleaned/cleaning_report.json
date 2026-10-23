@@ -1,0 +1,18 @@
+{
+  "timestamp": "2026-10-23",
+  "initial_raw_records": 722842,
+  "garbage_records_removed": 1350,
+  "conflict_groups_resolved": 2208,
+  "clean_records_total": 714314,
+  "splits": {
+    "train_full": 571451,
+    "train_subset_80k": 80000,
+    "validation": 71431,
+    "test": 71432
+  },
+  "rare_class_counts_in_train_subset_80k": {
+    "critical": 1400,
+    "medium": 5586
+  },
+  "compound_strat_groups": 13
+}
