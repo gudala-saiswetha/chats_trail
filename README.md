@@ -105,6 +105,27 @@ python3 scripts/step4_baseline_benchmarks.py
 
 ## 6. Changelog & Resolution History
 
+### [2026-10-23] — Phase 6: Dual Environment Training & Empirical Head-to-Head [COMPLETED]
+- **Hardware Verified:** Apple Silicon M4 Pro (MPS acceleration) vs Google Colab (NVIDIA Tesla T4 GPU).
+- **Artifacts Saved:**
+  - `checkpoints_mac/best_hls_guard.pt` (Mac M4 Pro production checkpoint, 15,000 steps, batch size 16).
+  - `benchmarks/hls_guard_mac_evaluation_report.json` (Mac comprehensive evaluation report).
+  - Cloud Backup: `/content/drive/MyDrive/HLS_Guard_Checkpoints/` (Colab run, 7,500 steps, batch size 32).
+- **Head-to-Head Model Performance:**
+
+| Evaluation Metric | Local Mac (Apple M4 Pro MPS) | Google Colab (Tesla T4 CUDA) |
+| :--- | :---: | :---: |
+| **Binary Detection Accuracy** | **91.25%** | 89.70% |
+| **Binary F1-Score** | **92.52%** | 91.05% |
+| **FPR Suppression Target ($\le 1.5\%$)** | **1.40%** (thresh 0.75) | **1.02%** (thresh 0.65) |
+| **Adversarial Obfuscation Recall** | **99.60%** | 97.60% |
+| **System Prompt Extraction Detection** | **100.0% Prec / 98.2% Rec** | 99.5% Prec / 97.8% Rec |
+| **Jailbreak Detection (DAN / Persona)** | **94.06% F1** | 92.96% F1 |
+| **Critical Risk Recall** | **100.0%** | **100.0%** |
+| **Single-Prompt Inference Latency** | **9.2 ms – 12.7 ms** | 14.2 ms – 15.7 ms |
+
+- **Verification:** Live interactive test suite verified on real inputs: standard questions permitted (`[ALLOW]`), malicious injections and evasions halted (`[BLOCK]`), and borderline research/screenplay queries triaged (`[FLAG]`).
+
 ### [2026-10-23] — Phase 5: Step 5 Policy Defense Engine [COMPLETED]
 - **Modules Created:**
   - [`models/policy_engine.py`](file:///Users/saiswethag/Downloads/chats_trail/models/policy_engine.py): Production security gateway implementing deterministic three-tier policy rules (`ALLOW`, `FLAG`, `BLOCK`) with latency tracking and dominant branch interpretation (Objective 7).

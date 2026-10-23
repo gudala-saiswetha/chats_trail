@@ -44,5 +44,6 @@ dataset/cleaned/train.parquet
 *.bin
 *.onnx
 checkpoints/
+checkpoints_mac/
 token_cache/
 

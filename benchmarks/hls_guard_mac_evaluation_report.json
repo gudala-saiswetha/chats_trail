@@ -1,0 +1,161 @@
+{
+  "timestamp": "2026-10-23",
+  "checkpoint": "checkpoints_mac/best_hls_guard.pt",
+  "test_samples_evaluated": 2000,
+  "inference_benchmark": {
+    "latency_ms_per_prompt": 5.71,
+    "throughput_prompts_per_sec": 175.18,
+    "device": "mps"
+  },
+  "binary_classification": {
+    "accuracy_default_threshold": 0.9125,
+    "roc_auc": 0.9754,
+    "optimal_calibrated_threshold": 0.5,
+    "threshold_sweep": [
+      {
+        "threshold": 0.3,
+        "accuracy": 0.9105,
+        "precision": 0.9019,
+        "recall": 0.9563,
+        "f1": 0.9283,
+        "fpr": 0.1599
+      },
+      {
+        "threshold": 0.4,
+        "accuracy": 0.922,
+        "precision": 0.94,
+        "recall": 0.9307,
+        "f1": 0.9353,
+        "fpr": 0.0914
+      },
+      {
+        "threshold": 0.5,
+        "accuracy": 0.9125,
+        "precision": 0.9593,
+        "recall": 0.8936,
+        "f1": 0.9252,
+        "fpr": 0.0584
+      },
+      {
+        "threshold": 0.55,
+        "accuracy": 0.9,
+        "precision": 0.9694,
+        "recall": 0.8622,
+        "f1": 0.9127,
+        "fpr": 0.0419
+      },
+      {
+        "threshold": 0.6,
+        "accuracy": 0.8895,
+        "precision": 0.9769,
+        "recall": 0.8375,
+        "f1": 0.9018,
+        "fpr": 0.0305
+      },
+      {
+        "threshold": 0.65,
+        "accuracy": 0.8835,
+        "precision": 0.9794,
+        "recall": 0.8251,
+        "f1": 0.8957,
+        "fpr": 0.0266
+      },
+      {
+        "threshold": 0.7,
+        "accuracy": 0.878,
+        "precision": 0.9859,
+        "recall": 0.8102,
+        "f1": 0.8895,
+        "fpr": 0.0178
+      },
+      {
+        "threshold": 0.75,
+        "accuracy": 0.868,
+        "precision": 0.9887,
+        "recall": 0.7913,
+        "f1": 0.879,
+        "fpr": 0.014
+      },
+      {
+        "threshold": 0.8,
+        "accuracy": 0.8575,
+        "precision": 0.9915,
+        "recall": 0.7715,
+        "f1": 0.8677,
+        "fpr": 0.0102
+      }
+    ]
+  },
+  "category_classification": {
+    "accuracy": 0.9135,
+    "macro_f1": 0.9101,
+    "class_breakdown": {
+      "benign_control": {
+        "precision": 0.9074315514993481,
+        "recall": 0.883248730964467,
+        "f1-score": 0.895176848874598,
+        "support": 788.0
+      },
+      "direct_injection": {
+        "precision": 0.7901234567901234,
+        "recall": 0.8384279475982532,
+        "f1-score": 0.8135593220338984,
+        "support": 229.0
+      },
+      "jailbreak": {
+        "precision": 0.9339378238341969,
+        "recall": 0.9474375821287779,
+        "f1-score": 0.9406392694063926,
+        "support": 761.0
+      },
+      "system_prompt_extraction": {
+        "precision": 1.0,
+        "recall": 0.9819819819819819,
+        "f1-score": 0.990909090909091,
+        "support": 222.0
+      }
+    }
+  },
+  "risk_classification": {
+    "accuracy": 0.909,
+    "macro_f1": 0.8773,
+    "critical_risk_recall": 1.0,
+    "class_breakdown": {
+      "none": {
+        "precision": 0.9007633587786259,
+        "recall": 0.8984771573604061,
+        "f1-score": 0.8996188055908514,
+        "support": 788.0
+      },
+      "low": {
+        "precision": 0.9260312944523471,
+        "recall": 0.9273504273504274,
+        "f1-score": 0.9266903914590747,
+        "support": 702.0
+      },
+      "medium": {
+        "precision": 0.5428571428571428,
+        "recall": 1.0,
+        "f1-score": 0.7037037037037037,
+        "support": 19.0
+      },
+      "high": {
+        "precision": 0.924892703862661,
+        "recall": 0.8941908713692946,
+        "f1-score": 0.9092827004219409,
+        "support": 482.0
+      },
+      "critical": {
+        "precision": 0.9,
+        "recall": 1.0,
+        "f1-score": 0.9473684210526315,
+        "support": 9.0
+      }
+    }
+  },
+  "adversarial_robustness_stress_test": {
+    "clean_malicious_recall": 0.8936,
+    "obfuscated_perturbed_recall": 0.996,
+    "retention_rate": 1.1146
+  }
+}

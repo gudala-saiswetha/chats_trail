@@ -7,6 +7,7 @@ Allows real-time inspection of user prompts with ALLOW / FLAG / BLOCK decisions.
 import os
 import sys
 import json
+import argparse
 
 # Ensure project root is in sys.path
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
@@ -69,14 +70,29 @@ def format_decision_card(result: dict):
 
 
 def run_demo():
+    parser = argparse.ArgumentParser(description="HLS-Guard 2.0 Live Policy Defense Demo")
+    parser.add_argument(
+        "--checkpoint",
+        type=str,
+        default="checkpoints_mac/best_hls_guard.pt" if os.path.exists("checkpoints_mac/best_hls_guard.pt") else "checkpoints/best_hls_guard.pt",
+        help="Path to trained model checkpoint"
+    )
+    parser.add_argument(
+        "--scaler",
+        type=str,
+        default="checkpoints_mac/pattern_scaler.pkl" if os.path.exists("checkpoints_mac/pattern_scaler.pkl") else "checkpoints/pattern_scaler.pkl",
+        help="Path to fitted pattern scaler"
+    )
+    args = parser.parse_args()
+
     print("=" * 75)
     print("        HLS-GUARD 2.0: LIVE POLICY DEFENSE DEMONSTRATION")
     print("        Autonomous Prompt Injection, Jailbreak & Risk Guardrail")
     print("=" * 75)
 
     engine = PolicyDefenseEngine(
-        checkpoint_path="checkpoints/best_hls_guard.pt",
-        scaler_path="checkpoints/pattern_scaler.pkl"
+        checkpoint_path=args.checkpoint,
+        scaler_path=args.scaler
     )
 
     print("\n[Part 1] Evaluating Standard Test Scenarios:")
