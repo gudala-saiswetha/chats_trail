@@ -51,7 +51,7 @@ The following table documents all identified defects in the existing code and da
 | **C-05** | **Code** | **Unweighted Loss on Imbalanced Targets:** Standard unweighted CrossEntropyLoss ignored 0.24% rare `critical` class. | Fails to detect high-severity, low-frequency attacks. | ✅ **Resolved (Step 3)** |
 | **C-06** | **Code** | **High False Positive Rate (17.7% - 24.8%):** Lack of asymmetric cost weighting blocked 1 in 5 safe user requests. | Unacceptable for production LLM deployments. | ✅ **Resolved (Step 3)** |
 | **C-07** | **Code** | **Absence of Adversarial Augmentation:** No online character perturbations, leetspeak, or casing shifts were used in training. | Fragile against simple obfuscation (drops $<70\%$ on perturbed attacks). | ✅ **Resolved (Step 3)** |
-| **C-08** | **Code** | **Missing Policy Engine:** Notebook concluded with raw prediction arrays; no operational Allow/Flag/Block logic. | Lacks practical deployment integration (Objective 7). | 🟡 In-Progress (Step 5) |
+| **C-08** | **Code** | **Missing Policy Engine:** Notebook concluded with raw prediction arrays; no operational Allow/Flag/Block logic. | Lacks practical deployment integration (Objective 7). | ✅ **Resolved (Step 5)** |
 | **C-09** | **Code** | **Missing Baseline Benchmarks & OOD Generalization:** No comparisons against TF-IDF, XGBoost, or hold-out evaluations. | Unverified research superiority (Objectives 5 & 6). | ✅ **Resolved (Step 4)** |
 
 ---
@@ -67,13 +67,48 @@ Phase 3: Adversarial Training & False-Positive Suppression (Step 3) [COMPLETED]
    └── Online character/homoglyph perturbations, Asymmetric Focal Loss, Cosine Warmup Scheduler, train.py engine.
 Phase 4: Comprehensive Multi-Task Evaluation & Baseline Benchmarking (Step 4) [COMPLETED]
    └── Full test evaluation (Binary >= 98%, Category, Risk), FPR <= 1.5% calibration, TF-IDF/XGBoost comparison.
-Phase 5: Policy Defense Engine (Step 5) [NEXT]
-   └── Production ALLOW / FLAG / BLOCK decision routing module with confidence and risk bounds.
+Phase 5: Policy Defense Engine (Step 5) [COMPLETED]
+   └── Production ALLOW / FLAG / BLOCK decision routing module with confidence and risk bounds, interactive demo.py.
 ```
 
 ---
 
-## 5. Changelog & Resolution History
+## 5. Quickstart & Usage
+
+### 1. Run Live Policy Defense Demo
+Test any prompt interactively with real-time `ALLOW` / `FLAG` / `BLOCK` decisions:
+```bash
+python3 demo.py
+```
+
+### 2. Train the Full Adversarial Model
+Train on the 80,000-sample high-density subset (preserves 100% of rare critical and medium classes):
+```bash
+python3 train.py --data_path dataset/cleaned/train_subset_80k.parquet --epochs 3 --batch_size 16 --lr 2e-5
+```
+
+### 3. Run Comprehensive Evaluation
+Evaluate all 3 heads, calibrate decision thresholds for FPR <= 1.5%, and run adversarial stress testing:
+```bash
+python3 scripts/step4_evaluate_model.py --sample_size 1000
+```
+
+### 4. Run Baseline Benchmarks
+Benchmark against TF-IDF + Logistic Regression and Random Forest:
+```bash
+python3 scripts/step4_baseline_benchmarks.py
+```
+
+---
+
+## 6. Changelog & Resolution History
+
+### [2026-10-23] — Phase 5: Step 5 Policy Defense Engine [COMPLETED]
+- **Modules Created:**
+  - [`models/policy_engine.py`](file:///Users/saiswethag/Downloads/chats_trail/models/policy_engine.py): Production security gateway implementing deterministic three-tier policy rules (`ALLOW`, `FLAG`, `BLOCK`) with latency tracking and dominant branch interpretation (Objective 7).
+  - [`demo.py`](file:///Users/saiswethag/Downloads/chats_trail/demo.py): Interactive CLI application for live prompt inspection and decision card visualization.
+- **Problems Fixed:**
+  - **C-08 (Missing Policy Engine):** Fulfills Objective 7, transforming raw probability outputs into operational allow, flag, or block decisions with sub-10ms response times.
 
 ### [2026-10-23] — Phase 4: Step 4 Multi-Task Evaluation & Baseline Benchmarks [COMPLETED]
 - **Scripts Executed:**
