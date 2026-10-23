@@ -30,9 +30,12 @@ wheels/
 .ipynb_checkpoints
 
 # Large Datasets (>100MB files exceed GitHub limits)
+dataset/guardrailer_dataset_v1.parquet
+dataset/cleaned/train.parquet
 *.parquet
-dataset/*.parquet
-dataset/cleaned/*.parquet
+!dataset/cleaned/train_subset_80k.parquet
+!dataset/cleaned/val.parquet
+!dataset/cleaned/test.parquet
 !dataset/README.md
 !dataset/cleaned/cleaning_report.json
 
