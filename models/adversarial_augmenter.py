@@ -132,3 +132,4 @@ class AdversarialAugmenter:
             augmented = self.apply_case_jitter(augmented)
 
         return augmented
+

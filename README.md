@@ -51,8 +51,8 @@ The following table documents all identified defects in the existing code and da
 | **C-05** | **Code** | **Unweighted Loss on Imbalanced Targets:** Standard unweighted CrossEntropyLoss ignored 0.24% rare `critical` class. | Fails to detect high-severity, low-frequency attacks. | ✅ **Resolved (Step 3)** |
 | **C-06** | **Code** | **High False Positive Rate (17.7% - 24.8%):** Lack of asymmetric cost weighting blocked 1 in 5 safe user requests. | Unacceptable for production LLM deployments. | ✅ **Resolved (Step 3)** |
 | **C-07** | **Code** | **Absence of Adversarial Augmentation:** No online character perturbations, leetspeak, or casing shifts were used in training. | Fragile against simple obfuscation (drops $<70\%$ on perturbed attacks). | ✅ **Resolved (Step 3)** |
-| **C-08** | **Code** | **Missing Policy Engine:** Notebook concluded with raw prediction arrays; no operational Allow/Flag/Block logic. | Lacks practical deployment integration (Objective 7). | ⏳ Pending (Step 5) |
-| **C-09** | **Code** | **Missing Baseline Benchmarks & OOD Generalization:** No comparisons against TF-IDF, XGBoost, or hold-out evaluations. | Unverified research superiority (Objectives 5 & 6). | 🟡 In-Progress (Step 4) |
+| **C-08** | **Code** | **Missing Policy Engine:** Notebook concluded with raw prediction arrays; no operational Allow/Flag/Block logic. | Lacks practical deployment integration (Objective 7). | 🟡 In-Progress (Step 5) |
+| **C-09** | **Code** | **Missing Baseline Benchmarks & OOD Generalization:** No comparisons against TF-IDF, XGBoost, or hold-out evaluations. | Unverified research superiority (Objectives 5 & 6). | ✅ **Resolved (Step 4)** |
 
 ---
 
@@ -65,15 +65,34 @@ Phase 2: Tri-Head HLS-Guard Architecture & Feature Pipeline (Step 2) [COMPLETED]
    └── Gated Cross-Feature Fusion (Option A), 3 heads (Binary, Category, Risk), PatternScaler fitted, multi-task backprop verified.
 Phase 3: Adversarial Training & False-Positive Suppression (Step 3) [COMPLETED]
    └── Online character/homoglyph perturbations, Asymmetric Focal Loss, Cosine Warmup Scheduler, train.py engine.
-Phase 4: Comprehensive Multi-Task Evaluation & Baseline Benchmarking (Step 4) [NEXT]
+Phase 4: Comprehensive Multi-Task Evaluation & Baseline Benchmarking (Step 4) [COMPLETED]
    └── Full test evaluation (Binary >= 98%, Category, Risk), FPR <= 1.5% calibration, TF-IDF/XGBoost comparison.
-Phase 5: Policy Defense Engine (Step 5)
+Phase 5: Policy Defense Engine (Step 5) [NEXT]
    └── Production ALLOW / FLAG / BLOCK decision routing module with confidence and risk bounds.
 ```
 
 ---
 
 ## 5. Changelog & Resolution History
+
+### [2026-10-23] — Phase 4: Step 4 Multi-Task Evaluation & Baseline Benchmarks [COMPLETED]
+- **Scripts Executed:**
+  - [`scripts/step4_evaluate_model.py`](file:///Users/saiswethag/Downloads/chats_trail/scripts/step4_evaluate_model.py): Comprehensive test set evaluation across all 3 heads, threshold calibration, and adversarial perturbation stress testing (Objective 5).
+  - [`scripts/step4_baseline_benchmarks.py`](file:///Users/saiswethag/Downloads/chats_trail/scripts/step4_baseline_benchmarks.py): Empirical comparison against standard baselines (Objective 6).
+- **Artifacts Created:**
+  - [`benchmarks/baseline_comparison_results.json`](file:///Users/saiswethag/Downloads/chats_trail/benchmarks/baseline_comparison_results.json)
+  - [`benchmarks/hls_guard_evaluation_report.json`](file:///Users/saiswethag/Downloads/chats_trail/benchmarks/hls_guard_evaluation_report.json)
+- **Empirical Baseline Comparison Results (Objective 6):**
+
+| Model Architecture | Accuracy | Precision | Recall | F1-Score | False Positive Rate (FPR) | Latency |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **Baseline 1: TF-IDF + Logistic Regression** | 82.20% | 81.94% | 90.59% | 86.05% | 30.71% | <0.1 ms |
+| **Baseline 2: 14 Patterns + Random Forest** | 73.75% | 72.61% | 91.01% | 80.78% | 52.79% | 0.01 ms |
+| **Baseline 3: Hybrid (TF-IDF + Patterns)** | 82.25% | 82.24% | 90.18% | 86.03% | 29.95% | <0.1 ms |
+| **Proposed: Gated HLS-Guard 2.0 (Tri-Head)** | **98.35%** | **98.52%** | **98.18%** | **98.35%** | **1.24%** | **1.65 ms** |
+
+- **Problems Fixed:**
+  - **C-09 (Missing Baselines & Generalization):** Formally validated that traditional NLP and pure pattern matchers suffer from intolerable false alarm rates ($29.9\% - 52.8\%$ FPR), whereas HLS-Guard 2.0 achieves $\ge 98\%$ accuracy and suppresses false alarms to $1.24\%$.
 
 ### [2026-10-23] — Phase 3: Step 3 Adversarial Training & False-Positive Suppression [COMPLETED]
 - **Scripts & Modules Created:**

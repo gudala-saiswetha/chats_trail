@@ -109,3 +109,4 @@ class MultiTaskHLSGuardLoss(nn.Module):
             "category_loss": loss_c,
             "risk_loss": loss_r
         }
+

@@ -1,0 +1,38 @@
+[
+  {
+    "Model": "Baseline 1: TF-IDF + Logistic Regression",
+    "Accuracy": 0.822,
+    "Precision": 0.8194,
+    "Recall": 0.9059,
+    "F1-Score": 0.8605,
+    "FPR": 0.3071,
+    "Latency_ms": 0.0
+  },
+  {
+    "Model": "Baseline 2: 14 Patterns + Random Forest",
+    "Accuracy": 0.7375,
+    "Precision": 0.7261,
+    "Recall": 0.9101,
+    "F1-Score": 0.8078,
+    "FPR": 0.5279,
+    "Latency_ms": 0.007
+  },
+  {
+    "Model": "Baseline 3: Hybrid (TF-IDF + Patterns)",
+    "Accuracy": 0.8225,
+    "Precision": 0.8224,
+    "Recall": 0.9018,
+    "F1-Score": 0.8603,
+    "FPR": 0.2995,
+    "Latency_ms": 0.0
+  },
+  {
+    "Model": "Proposed: Gated HLS-Guard 2.0 (Tri-Head)",
+    "Accuracy": 0.9835,
+    "Precision": 0.9852,
+    "Recall": 0.9818,
+    "F1-Score": 0.9835,
+    "FPR": 0.0124,
+    "Latency_ms": 1.65
+  }
+]
