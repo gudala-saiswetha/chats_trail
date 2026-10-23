@@ -285,7 +285,7 @@ def evaluate_test_set(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Step 4: HLS-Guard Comprehensive Evaluation")
-    parser.add_argument("--test_path", type=str, default="dataset/cleaned/test.parquet")
+    parser.add_argument("--test_path", type=str, default="dataset/gold_clean/test_gold.parquet")
     parser.add_argument("--checkpoint", type=str, default="checkpoints/best_hls_guard.pt")
     parser.add_argument("--model_name", type=str, default="distilroberta-base")
     parser.add_argument("--batch_size", type=int, default=32)

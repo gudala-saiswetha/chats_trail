@@ -28,8 +28,8 @@ def run_step2_verification():
     print("STEP 2: MODEL ARCHITECTURE & MULTI-TASK PIPELINE VERIFICATION")
     print("=" * 65)
 
-    # 1. Load small verification batch from cleaned dataset
-    data_path = "dataset/cleaned/train_subset_80k.parquet"
+    # 1. Load small verification batch from gold cleaned dataset
+    data_path = "dataset/gold_clean/train_gold.parquet"
     print(f"Loading verification slice from {data_path}...")
     df = pd.read_parquet(data_path).head(16)
     print(f"Loaded batch of {len(df)} samples.")
@@ -37,7 +37,7 @@ def run_step2_verification():
     # 2. Extract and scale pattern features
     print("\n[1/4] Extracting and scaling 14 handcrafted pattern features...")
     pattern_matrix = build_pattern_matrix(df, text_column="head_tail_prompt")
-    scaler = PatternScaler(scaler_path="models/pattern_scaler.pkl")
+    scaler = PatternScaler(scaler_path="models/verify_scaler.pkl")
     scaled_patterns = scaler.fit_and_save(pattern_matrix)
     print(f"Pattern matrix shape: {scaled_patterns.shape} (14 features verified).")
 

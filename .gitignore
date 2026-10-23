@@ -33,11 +33,7 @@ wheels/
 dataset/guardrailer_dataset_v1.parquet
 dataset/cleaned/train.parquet
 *.parquet
-!dataset/cleaned/train_subset_80k.parquet
-!dataset/cleaned/val.parquet
-!dataset/cleaned/test.parquet
 !dataset/README.md
-!dataset/cleaned/cleaning_report.json
 
 # Model Weights & Checkpoints
 *.pt

@@ -108,9 +108,11 @@ def main():
     t0 = torch.cuda.Event(enable_timing=True) if torch.cuda.is_available() else None
     t1 = torch.cuda.Event(enable_timing=True) if torch.cuda.is_available() else None
 
+    all_test_texts = test_df["head_tail_prompt"].tolist()
+
     with torch.no_grad():
         for i in range(0, len(test_df), args.batch_size):
-            batch_texts = test_df.iloc[i:i + args.batch_size]["head_tail_prompt"].tolist()
+            batch_texts = all_test_texts[i:i + args.batch_size]
             enc = tokenizer(batch_texts, padding=True, truncation=True, max_length=256, return_tensors="pt").to(device)
             pat = torch.tensor(test_patterns[i:i + args.batch_size], dtype=torch.float32).to(device)
 

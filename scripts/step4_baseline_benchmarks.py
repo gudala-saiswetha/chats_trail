@@ -30,8 +30,8 @@ def run_baseline_benchmarks():
     print("STEP 4: BASELINE BENCHMARKING SUITE (OBJECTIVE 6)")
     print("=" * 65)
 
-    train_path = "dataset/cleaned/train_subset_80k.parquet"
-    test_path = "dataset/cleaned/test.parquet"
+    train_path = "dataset/gold_clean/train_gold.parquet"
+    test_path = "dataset/gold_clean/test_gold.parquet"
     results_path = "benchmarks/baseline_comparison_results.json"
     os.makedirs(os.path.dirname(results_path), exist_ok=True)
 
