@@ -1,0 +1,13 @@
+{
+  "total_raw_records": 722842,
+  "dropped_null_or_too_short": 2336,
+  "dropped_non_ascii_scripts": 147227,
+  "dropped_latin_foreign_languages": 25575,
+  "dropped_fake_system_prompt_leakage": 63592,
+  "dropped_unverified_keyword_dump_jailbreaks": 161440,
+  "dropped_contradictory_label_rows": 0,
+  "dropped_duplicate_prompts": 0,
+  "total_gold_clean_records": 238740,
+  "gold_clean_attacks": 117025,
+  "gold_clean_benign": 121715
+}

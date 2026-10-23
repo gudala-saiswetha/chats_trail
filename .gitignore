@@ -45,5 +45,10 @@ dataset/cleaned/train.parquet
 *.onnx
 checkpoints/
 checkpoints_mac/
+checkpoints_98/
+checkpoints_gold/
+checkpoints_colab/
+dataset/gold_clean/*.parquet
+!dataset/gold_clean/cleaning_report.json
 token_cache/
 
