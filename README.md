@@ -1,5 +1,7 @@
 # HLS-Guard: Adversarial Multi-Task LLM Prompt Injection Defense Framework
 
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/gudala-saiswetha/chats_trail/blob/main/HLS_Guard_Colab.ipynb)
+
 **Version:** 2.0 (Active Optimization)  
 **Last Updated:** October 23, 2026  
 **Primary Target:** $\ge 98.0\%$ Binary Accuracy, $< 1.5\%$ False Positive Rate (FPR), Robust Adversarial Defense, Multi-Task Risk & Category Classification, and Automated Policy Gating (`ALLOW` / `FLAG` / `BLOCK`).
