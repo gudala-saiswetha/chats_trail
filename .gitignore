@@ -34,6 +34,7 @@ dataset/guardrailer_dataset_v1.parquet
 dataset/cleaned/train.parquet
 *.parquet
 !dataset/README.md
+!dataset/raw_dirty_benchmark.parquet
 
 # Model Weights & Checkpoints
 *.pt
