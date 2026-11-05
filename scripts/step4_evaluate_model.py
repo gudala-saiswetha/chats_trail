@@ -85,9 +85,16 @@ def evaluate_test_set(args):
         dropout=0.0
     ).to(device)
 
-    if os.path.exists(args.checkpoint):
-        print(f"Loading weights from checkpoint: {args.checkpoint} ...")
-        ckpt = torch.load(args.checkpoint, map_location=device, weights_only=False)
+    actual_ckpt = args.checkpoint
+    if not os.path.exists(actual_ckpt):
+        for cand in ["checkpoints_colab/best_hls_guard.pt", "checkpoints_gold/best_hls_guard.pt", "checkpoints_multitask/best_hls_guard.pt", "checkpoints_mac/best_hls_guard.pt"]:
+            if os.path.exists(cand):
+                actual_ckpt = cand
+                break
+
+    if os.path.exists(actual_ckpt):
+        print(f"Loading weights from checkpoint: {actual_ckpt} ...")
+        ckpt = torch.load(actual_ckpt, map_location=device, weights_only=False)
         model.load_state_dict(ckpt["model_state_dict"])
     else:
         print(f"Notice: Checkpoint not found at {args.checkpoint}. Evaluating initialized model weights.")
