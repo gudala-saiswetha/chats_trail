@@ -102,8 +102,12 @@ def main():
     # 4. Run Test Inference
     print(f"\n[4/4] Executing batch inference across {len(test_df):,} test prompts...")
     y_true = test_df["binary_label"].to_numpy()
+    has_cat = "category_label" in test_df.columns
+    has_risk = "risk_label" in test_df.columns
     probs = []
     preds = []
+    cat_preds = []
+    risk_preds = []
 
     t0 = torch.cuda.Event(enable_timing=True) if torch.cuda.is_available() else None
     t1 = torch.cuda.Event(enable_timing=True) if torch.cuda.is_available() else None
@@ -123,6 +127,11 @@ def main():
             probs.extend(b_probs)
             preds.extend(b_preds)
 
+            if has_cat:
+                cat_preds.extend(out["category_logits"].argmax(dim=-1).cpu().numpy())
+            if has_risk:
+                risk_preds.extend(out["risk_logits"].argmax(dim=-1).cpu().numpy())
+
     probs = np.array(probs)
     preds = np.array(preds)
 
@@ -132,6 +141,9 @@ def main():
     cm = confusion_matrix(y_true, preds)
     fpr = cm[0, 1] / max(cm[0, 0] + cm[0, 1], 1)
     roc_auc = roc_auc_score(y_true, probs)
+
+    cat_acc = accuracy_score(test_df["category_label"], cat_preds) if has_cat else None
+    risk_acc = accuracy_score(test_df["risk_label"], risk_preds) if has_risk else None
 
     # Save detailed JSON report
     os.makedirs(os.path.dirname(args.output_report), exist_ok=True)
@@ -146,6 +158,8 @@ def main():
         "f1_score": round(float(f1), 4),
         "false_positive_rate": round(float(fpr), 4),
         "roc_auc_score": round(float(roc_auc), 4),
+        "category_accuracy": round(float(cat_acc), 4) if cat_acc is not None else None,
+        "risk_accuracy": round(float(risk_acc), 4) if risk_acc is not None else None,
         "confusion_matrix": {
             "true_negatives_safe_allowed": int(cm[0, 0]),
             "false_positives_safe_blocked": int(cm[0, 1]),
@@ -163,6 +177,14 @@ def main():
     print("=" * 75)
     print(f"  >>> VERIFIED ACCURACY     : {acc * 100:.2f}% <<<")
     print(f"  Precision                 : {p * 100:.2f}%")
+    print(f"  Recall (Attack Catch Rate): {r * 100:.2f}%")
+    print(f"  F1-Score                  : {f1 * 100:.2f}%")
+    print(f"  False Positive Rate (FPR) : {fpr * 100:.2f}%")
+    print(f"  ROC-AUC Score             : {roc_auc * 100:.2f}%")
+    if cat_acc is not None:
+        print(f"  Category Accuracy (4-cls) : {cat_acc * 100:.2f}%")
+    if risk_acc is not None:
+        print(f"  Risk Accuracy (5-cls)     : {risk_acc * 100:.2f}%")
     print(f"  Recall (Attack Catch Rate): {r * 100:.2f}%")
     print(f"  F1-Score                  : {f1 * 100:.2f}%")
     print(f"  False Positive Rate (FPR) : {fpr * 100:.2f}%")

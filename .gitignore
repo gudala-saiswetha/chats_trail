@@ -44,6 +44,8 @@ checkpoints_mac/
 checkpoints_98/
 checkpoints_gold/
 checkpoints_colab/
+checkpoints_multitask/
+models/verify_scaler.pkl
 !dataset/gold_clean/*.parquet
 !dataset/gold_clean/cleaning_report.json
 token_cache/

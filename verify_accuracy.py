@@ -17,6 +17,8 @@ def verify():
 
     test_file = "checkpoints_gold/test_evaluated.parquet"
     if not os.path.exists(test_file):
+        test_file = "checkpoints_mac/test_evaluated.parquet"
+    if not os.path.exists(test_file):
         test_file = "checkpoints_98/test_evaluated_4k.parquet"
 
     if not os.path.exists(test_file):

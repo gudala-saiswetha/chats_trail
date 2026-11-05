@@ -69,18 +69,30 @@ def format_decision_card(result: dict):
     print("└" + "─" * (box_w - 2) + "┘")
 
 
+def get_default_checkpoint():
+    for p in ["checkpoints_gold/best_hls_guard.pt", "checkpoints_multitask/best_hls_guard.pt", "checkpoints_mac/best_hls_guard.pt", "checkpoints/best_hls_guard.pt"]:
+        if os.path.exists(p):
+            return p
+    return "checkpoints_gold/best_hls_guard.pt"
+
+def get_default_scaler():
+    for p in ["checkpoints_gold/pattern_scaler.pkl", "checkpoints_multitask/pattern_scaler.pkl", "checkpoints_mac/pattern_scaler.pkl", "models/pattern_scaler.pkl"]:
+        if os.path.exists(p):
+            return p
+    return "checkpoints_gold/pattern_scaler.pkl"
+
 def run_demo():
     parser = argparse.ArgumentParser(description="HLS-Guard 2.0 Live Policy Defense Demo")
     parser.add_argument(
         "--checkpoint",
         type=str,
-        default="checkpoints_mac/best_hls_guard.pt" if os.path.exists("checkpoints_mac/best_hls_guard.pt") else "checkpoints/best_hls_guard.pt",
+        default=get_default_checkpoint(),
         help="Path to trained model checkpoint"
     )
     parser.add_argument(
         "--scaler",
         type=str,
-        default="checkpoints_mac/pattern_scaler.pkl" if os.path.exists("checkpoints_mac/pattern_scaler.pkl") else "checkpoints/pattern_scaler.pkl",
+        default=get_default_scaler(),
         help="Path to fitted pattern scaler"
     )
     args = parser.parse_args()

@@ -22,20 +22,27 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 
 from models.hls_guard import GatedHLSGuard
 from models.dataset_loader import build_pattern_matrix, PatternScaler
+from models.losses import MultiTaskHLSGuardLoss
 
 class GoldDataset(Dataset):
-    def __init__(self, encodings, patterns, labels):
+    def __init__(self, encodings, patterns, bin_labels, cat_labels=None, risk_labels=None):
         self.encodings = encodings
         self.patterns = torch.tensor(patterns, dtype=torch.float32)
-        self.labels = torch.tensor(labels, dtype=torch.long)
+        self.bin_labels = torch.tensor(bin_labels, dtype=torch.long)
+        self.cat_labels = torch.tensor(cat_labels, dtype=torch.long) if cat_labels is not None else None
+        self.risk_labels = torch.tensor(risk_labels, dtype=torch.long) if risk_labels is not None else None
 
     def __len__(self):
-        return len(self.labels)
+        return len(self.bin_labels)
 
     def __getitem__(self, idx):
         item = {key: val[idx] for key, val in self.encodings.items()}
         item["patterns"] = self.patterns[idx]
-        item["labels"] = self.labels[idx]
+        item["bin_labels"] = self.bin_labels[idx]
+        if self.cat_labels is not None:
+            item["cat_labels"] = self.cat_labels[idx]
+        if self.risk_labels is not None:
+            item["risk_labels"] = self.risk_labels[idx]
         return item
 
 def main():
@@ -98,8 +105,20 @@ def main():
     train_enc = tokenizer(train_df["head_tail_prompt"].tolist(), truncation=True, padding="max_length", max_length=256, return_tensors="pt")
     test_enc = tokenizer(test_df["head_tail_prompt"].tolist(), truncation=True, padding="max_length", max_length=256, return_tensors="pt")
 
-    train_dataset = GoldDataset(train_enc, train_patterns, train_df["binary_label"].to_numpy())
-    test_dataset = GoldDataset(test_enc, test_patterns, test_df["binary_label"].to_numpy())
+    train_dataset = GoldDataset(
+        train_enc,
+        train_patterns,
+        train_df["binary_label"].to_numpy(),
+        train_df["category_label"].to_numpy() if "category_label" in train_df.columns else None,
+        train_df["risk_label"].to_numpy() if "risk_label" in train_df.columns else None
+    )
+    test_dataset = GoldDataset(
+        test_enc,
+        test_patterns,
+        test_df["binary_label"].to_numpy(),
+        test_df["category_label"].to_numpy() if "category_label" in test_df.columns else None,
+        test_df["risk_label"].to_numpy() if "risk_label" in test_df.columns else None
+    )
 
     train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True)
     test_loader = DataLoader(test_dataset, batch_size=args.batch_size * 2, shuffle=False)
@@ -107,12 +126,14 @@ def main():
     # 4. Initialize Gated HLS-Guard Model
     print("\n[4/5] Initializing GatedHLSGuard (Transferring pretrained weights)...")
     model = GatedHLSGuard("distilroberta-base", num_pattern_features=14, num_categories=4, num_risk_levels=5).to(device)
-    if os.path.exists("checkpoints_mac/best_hls_guard.pt"):
-        ckpt = torch.load("checkpoints_mac/best_hls_guard.pt", map_location=device, weights_only=False)
-        model.load_state_dict(ckpt["model_state_dict"])
-        print("  Successfully loaded pretrained baseline weights from checkpoints_mac/best_hls_guard.pt!")
+    for ckpt_cand in ["checkpoints_gold/best_hls_guard.pt", "checkpoints_multitask/best_hls_guard.pt", "checkpoints_mac/best_hls_guard.pt"]:
+        if os.path.exists(ckpt_cand):
+            ckpt = torch.load(ckpt_cand, map_location=device, weights_only=False)
+            model.load_state_dict(ckpt["model_state_dict"])
+            print(f"  Successfully loaded pretrained baseline weights from {ckpt_cand}!")
+            break
 
-    loss_fn = nn.CrossEntropyLoss()
+    loss_fn = MultiTaskHLSGuardLoss(alpha_benign=0.70, gamma=2.0, w_binary=1.0, w_category=0.5, w_risk=0.5).to(device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=0.01)
 
     total_steps = len(train_loader) * args.epochs
@@ -129,11 +150,14 @@ def main():
             input_ids = batch["input_ids"].to(device)
             attention_mask = batch["attention_mask"].to(device)
             patterns = batch["patterns"].to(device)
-            labels = batch["labels"].to(device)
+            bin_labels = batch["bin_labels"].to(device)
+            cat_labels = batch["cat_labels"].to(device)
+            risk_labels = batch["risk_labels"].to(device)
 
             optimizer.zero_grad()
             out = model(input_ids, attention_mask, patterns)
-            loss = loss_fn(out["binary_logits"], labels)
+            losses = loss_fn(out["binary_logits"], out["category_logits"], out["risk_logits"], bin_labels, cat_labels, risk_labels)
+            loss = losses["total_loss"]
             loss.backward()
             torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
             optimizer.step()
@@ -142,12 +166,13 @@ def main():
             total_loss += loss.item()
             if step % 200 == 0 or step == len(train_loader):
                 elapsed = (time.time() - t0) / 60
-                print(f"Epoch {epoch}/{args.epochs} | Step {step:4d}/{len(train_loader)} | Loss: {loss.item():.4f} | Elapsed: {elapsed:.1f}m")
+                print(f"Epoch {epoch}/{args.epochs} | Step {step:4d}/{len(train_loader)} | Total Loss: {loss.item():.4f} (Bin: {losses['binary_loss'].item():.3f}, Cat: {losses['category_loss'].item():.3f}, Risk: {losses['risk_loss'].item():.3f}) | Elapsed: {elapsed:.1f}m")
 
         # Evaluate on Held-Out Clean Test Set
         print(f"\n--- Running Full Test Evaluation for Epoch {epoch} on {len(test_df):,} prompts ---")
         model.eval()
         preds, trues, probs = [], [], []
+        cat_preds, risk_preds = [], []
         with torch.no_grad():
             for batch in test_loader:
                 input_ids = batch["input_ids"].to(device)
@@ -158,19 +183,26 @@ def main():
                 p = out["binary_logits"].argmax(dim=-1).cpu().numpy()
                 preds.extend(p)
                 probs.extend(prob)
-                trues.extend(batch["labels"].numpy())
+                trues.extend(batch["bin_labels"].numpy())
+                cat_preds.extend(out["category_logits"].argmax(dim=-1).cpu().numpy())
+                risk_preds.extend(out["risk_logits"].argmax(dim=-1).cpu().numpy())
 
         acc = accuracy_score(trues, preds)
         p, r, f1, _ = precision_recall_fscore_support(trues, preds, average="binary")
         cm = confusion_matrix(trues, preds)
         fpr = cm[0, 1] / max(cm[0, 0] + cm[0, 1], 1)
+        cat_acc = accuracy_score(test_df["category_label"], cat_preds)
+        risk_acc = accuracy_score(test_df["risk_label"], risk_preds)
 
         print("-" * 65)
         print(f"EPOCH {epoch} TEST RESULTS (Evaluated on {len(test_df):,} Clean Held-Out Prompts):")
-        print(f"  >>> VERIFIED ACCURACY     : {acc * 100:.2f}% <<<")
-        print(f"  Precision                 : {p * 100:.2f}%")
-        print(f"  Recall (Attack Catch Rate): {r * 100:.2f}%")
-        print(f"  F1-Score                  : {f1 * 100:.2f}%")
+        print(f"  >>> VERIFIED BINARY ACCURACY : {acc * 100:.2f}% <<<")
+        print(f"  Precision                    : {p * 100:.2f}%")
+        print(f"  Recall (Attack Catch Rate)   : {r * 100:.2f}%")
+        print(f"  F1-Score                     : {f1 * 100:.2f}%")
+        print(f"  False Positive Rate (FPR)    : {fpr * 100:.2f}%")
+        print(f"  Category Accuracy (4-class)  : {cat_acc * 100:.2f}%")
+        print(f"  Risk Accuracy (5-class)      : {risk_acc * 100:.2f}%")
         print(f"  False Positive Rate (FPR) : {fpr * 100:.2f}%")
         print(f"  Confusion Matrix (TN: {cm[0, 0]}, FP: {cm[0, 1]} | FN: {cm[1, 0]}, TP: {cm[1, 1]}):\n{cm}")
         print("-" * 65 + "\n")

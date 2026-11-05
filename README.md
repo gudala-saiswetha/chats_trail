@@ -23,7 +23,20 @@ Large Language Models (LLMs) deployed in production applications are susceptible
 
 ---
 
-## 2. Initial State Audit (What Was Already Implemented)
+## 2. System Architecture Diagram
+
+![HLS-Guard 2.0 Architectural Pipeline](docs/architecture_diagram.png)
+
+The pipeline consists of five key stages:
+1. **Input Preprocessing:** Extracts head and tail windows (first 120 + last 120 words) to protect against payload truncation blindspots, and applies dynamic online adversarial augmentations.
+2. **Dual-Branch Extraction:** In parallel, Branch A extracts semantic intent (`distilroberta-base` 768-d $\to$ 256-d), while Branch B extracts 14 heuristic regex and lexical features (14-d $\to$ 256-d).
+3. **Gated Cross-Feature Fusion:** A learnable gate $g = \sigma(W \cdot \text{concat} + b)$ dynamically arbitrates between deep semantic context and explicit keyword indicators: $\text{fused} = (g \odot h_{\text{sem}}) + ((1 - g) \odot h_{\text{pat}})$.
+4. **Tri-Head Multi-Task Heads:** Jointly predicts binary detection (Benign vs Malicious with Asymmetric Focal Loss), 4 attack categories, and 5 risk tiers.
+5. **Policy Defense Engine:** Deterministic runtime decision router executing calibrated `ALLOW`, `FLAG`, or `BLOCK` actions in $< 10\text{ ms}$.
+
+---
+
+## 3. Initial State Audit (What Was Already Implemented)
 
 Before this optimization initiative, the repository contained:
 - **Dataset:** [`dataset/guardrailer_dataset_v1.parquet`](file:///Users/saiswethag/Downloads/chats_trail/dataset/guardrailer_dataset_v1.parquet) ($722,842$ rows) combining 6 external sources.
@@ -76,6 +89,14 @@ Phase 5: Policy Defense Engine (Step 5) [COMPLETED]
 ---
 
 ## 5. Quickstart & Usage
+
+### 0. Download Official Pre-Trained Weights (Instant Setup)
+If you do not wish to retrain the model from scratch, download the production multi-task weights from [GitHub Release v2.0](https://github.com/gudala-saiswetha/chats_trail/releases/tag/v2.0):
+```bash
+mkdir -p checkpoints_gold
+wget https://github.com/gudala-saiswetha/chats_trail/releases/download/v2.0/best_hls_guard.pt -P checkpoints_gold/
+wget https://github.com/gudala-saiswetha/chats_trail/releases/download/v2.0/pattern_scaler.pkl -P checkpoints_gold/
+```
 
 ### 1. Run Live Policy Defense Demo
 Test any prompt interactively with real-time `ALLOW` / `FLAG` / `BLOCK` decisions:
