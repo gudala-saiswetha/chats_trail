@@ -132,20 +132,17 @@ def create_diagram():
                      bg='#FEF2F2', border='#DC2626', lw=2.0, fontsize=11, text_color='#991B1B')
 
     # ---------------------------------------------------------------------------
-    # 4. PERFORMANCE EVALUATION & AUDIT METRICS (BOX 4)
+    # 4. PERFORMANCE EVALUATION (BOX 4)
     # ---------------------------------------------------------------------------
     b4 = FancyBboxPatch((0.5, 0.40), 15.0, 1.45, boxstyle='round,pad=0.03,rounding_size=0.20',
                         linewidth=1.8, edgecolor='#94A3B8', facecolor=C_OUTER_STAGE_4, zorder=1)
     ax.add_patch(b4)
 
-    ax.text(8.0, 1.45, '4. EMPIRICALLY VERIFIED PERFORMANCE METRICS (HELD-OUT TEST EVALUATION)',
-            ha='center', va='center', fontsize=11.5, fontweight='bold', color=COLOR_TITLE, zorder=3)
+    ax.text(8.0, 1.35, '4. PERFORMANCE EVALUATION',
+            ha='center', va='center', fontsize=13, fontweight='bold', color=COLOR_TITLE, zorder=3)
 
-    metrics_text = (
-        'Accuracy: 97.71%   |   Precision: 98.89%   |   Recall (Catch Rate): 96.40%   |   F1-Score: 97.63%\n'
-        'False Positive Rate (FPR): 1.04% (<=1.5% Target Met)   |   ROC-AUC: 99.65%   |   Inference Latency: <10 ms'
-    )
-    ax.text(8.0, 0.88, metrics_text, ha='center', va='center', fontsize=10.0, color='#1E293B', zorder=3, multialignment='center')
+    metrics_text = 'Accuracy, Precision, Recall, F1-Score, False Positive Rate (FPR), Confusion Matrix, Inference Latency'
+    ax.text(8.0, 0.82, metrics_text, ha='center', va='center', fontsize=11.0, color='#334155', zorder=3)
 
     # Connector Decision Engine -> Performance
     ax.annotate('', xy=(13.87, 1.85), xytext=(13.87, 2.20), arrowprops=dict(arrowstyle='->', lw=2.0, color=COLOR_ARROW))
@@ -165,3 +162,4 @@ def create_diagram():
 
 if __name__ == '__main__':
     create_diagram()
+
